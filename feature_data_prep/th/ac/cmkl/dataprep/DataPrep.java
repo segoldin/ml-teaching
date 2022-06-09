@@ -27,6 +27,9 @@ public class DataPrep extends JFrame
     /** User's nickname, used to create the file name */
     public static String nickname;
     
+    /** Image directory - entered as argument */
+    public static String imagePath;
+    
     /** holds entered values for the current image */
     private ImageData currentImageData = null;
     
@@ -70,7 +73,7 @@ public class DataPrep extends JFrame
       super("ML Data Preparation Application");
       imageFileNames = new ArrayList<String>();
       buildUI();
-      String imagePath = getImageDirectoryPath();
+      //String imagePath = getImageDirectoryPath();
       setupImageList(imagePath);
       writeCsvHeader();
     }
@@ -280,13 +283,27 @@ public class DataPrep extends JFrame
      {
 	File folder = new File(directory);
 	File[] listOfFiles = folder.listFiles();
+	if ((listOfFiles == null) || (listOfFiles.length == 0))
+	{
+	    JOptionPane.showMessageDialog(this, 
+			"Invalid image path "+ directory, "Invalid Path", JOptionPane.ERROR_MESSAGE); 
+	    System.exit(1);
+	}
 	for (File f : listOfFiles)
 	{
 	    if (f.isFile())
 	    {
-		imageFileNames.add(f.getAbsolutePath());
+		String filename = f.getAbsolutePath();
+		if (filename.endsWith(".jpg") || filename.endsWith(".png"))
+		    imageFileNames.add(f.getAbsolutePath());
 	    }
 	}
+	if (imageFileNames.size() == 0)
+	{
+	    JOptionPane.showMessageDialog(this, 
+			"No images found in "+ directory, "No images found", JOptionPane.ERROR_MESSAGE); 
+	    System.exit(1);
+	}	
 	/* randomize the order */
 	Collections.shuffle(imageFileNames,new Random(System.currentTimeMillis()));
      }
@@ -414,16 +431,17 @@ public class DataPrep extends JFrame
         System.out.println("Error setting look and feel!");
         System.exit(1);
         }
-     if (args.length < 1)
+     if (args.length < 2)
      {
 	JOptionPane.showMessageDialog(null, 
-			"Please enter your nickname after the program name, for instance:\n\n"+
-			" java -cp DataPrep.jar th.ac.cmkl.dataprep.DataPrep Boom\n\n", 
+			"Missing arguments. Usage:\n\n" +
+			" java -cp DataPrep.jar th.ac.cmkl.dataprep.DataPrep [nickname] [imagedir]\n\n", 
 			"Missing argument", JOptionPane.ERROR_MESSAGE);
 	System.exit(0);
 	
      }
      nickname = args[0];
+     imagePath = args[1];
      DataPrep app = new DataPrep();
      app.pack();
      // center the application 
